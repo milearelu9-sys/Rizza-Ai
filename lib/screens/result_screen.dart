@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:uuid/uuid.dart';
 import '../widgets/result_card.dart';
+import '../services/history_service.dart';
 
 class ResultScreen extends StatefulWidget {
   final String roastResponse;
@@ -21,6 +24,36 @@ class ResultScreen extends StatefulWidget {
 }
 
 class _ResultScreenState extends State<ResultScreen> {
+  @override
+  void initState() {
+    super.initState();
+    _saveToHistory();
+  }
+
+  Future<void> _saveToHistory() async {
+    final entry = HistoryEntry(
+      id: const Uuid().v4(),
+      inputText: widget.inputText,
+      roastResponse: widget.roastResponse,
+      rizzResponse: widget.rizzResponse,
+      createdAt: DateTime.now(),
+      mode: widget.mode,
+    );
+    await HistoryService.saveEntry(entry);
+  }
+
+  Future<void> _copyToClipboard(String text) async {
+    await Clipboard.setData(ClipboardData(text: text));
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('✓ Copied to clipboard!'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isModeRoast = widget.mode == 'roast';
@@ -88,14 +121,7 @@ class _ResultScreenState extends State<ResultScreen> {
                   child: _ActionButtonSmall(
                     label: 'Copy',
                     icon: Icons.copy,
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Copied to clipboard!'),
-                          duration: Duration(seconds: 2),
-                        ),
-                      );
-                    },
+                    onPressed: () => _copyToClipboard(displayText),
                   ),
                 ),
                 const SizedBox(width: 12),

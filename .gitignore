@@ -1,3 +1,4 @@
+.github/
 .DS_Store
 *.log
 *.pyc
@@ -35,3 +36,4 @@ android/local.properties
 lib/generated_plugin_registrant.dart
 app.*.symbols
 app.*.map.json
+.coverage
